@@ -8,10 +8,10 @@ import {
 } from 'react-beautiful-dnd'
 
 import EditSectionItemV2 from './EditSectionItemV2'
-import { Section } from '../../../graphql/types'
+import { Section } from '../../../../graphql/types'
 import NewSectionV2 from './NewSectionV2'
-import { reorderSections as reorderSectionsInDB } from '../../../utils/reorderSections'
-import { SectionsContext } from '../../../lib/contexts/SectionsContext'
+import { reorderSections as reorderSectionsInDB } from '../../../../utils/reorderSections'
+import { SectionsContext } from '../../../../lib/contexts/SectionsContext'
 
 interface Props {
   sections: Section[]
@@ -49,7 +49,9 @@ export default function EditSectionItemsV2({
   }
 
   return (
-    <Timeline className={`timeline-bg ${topLevel ? 'p-5' : ''}`}>
+    <Timeline
+      className={`edit-resource-timeline timeline-bg ${topLevel ? 'p-5' : ''}`}
+    >
       <DragDropContext onDragEnd={(result) => reorderSections({ result })}>
         <Droppable droppableId={`droppable-${parentSectionId}`}>
           {(provided) => (

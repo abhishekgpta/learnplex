@@ -6,17 +6,18 @@ import {
   ArrowLeftOutlined,
   CheckOutlined,
   ArrowRightOutlined,
+  MenuOutlined,
 } from '@ant-design/icons'
 import NProgress from 'nprogress'
 
-import { CONTENT_COL_LAYOUT, SIDEBAR_COL_LAYOUT } from '../../constants'
+import { CONTENT_COL_LAYOUT, SIDEBAR_COL_LAYOUT } from '../../../constants'
 import SidebarV2 from './Sidebar'
-import customMdParser from '../learn/Editor/lib/customMdParser'
-import { Resource, Section } from '../../graphql/types'
-import { UserContext } from '../../lib/contexts/UserContext'
-import { completeSection } from '../../utils/completeSection'
-import { checkIfEnrolledQuery, startProgress } from '../../utils/progress'
-import { getUserProgressByResourceId } from '../../utils/getUserProgressByResourceId'
+import customMdParser from '../Editor/lib/customMdParser'
+import { Resource, Section } from '../../../graphql/types'
+import { UserContext } from '../../../lib/contexts/UserContext'
+import { completeSection } from '../../../utils/completeSection'
+import { checkIfEnrolledQuery, startProgress } from '../../../utils/progress'
+import { getUserProgressByResourceId } from '../../../utils/getUserProgressByResourceId'
 
 interface Props {
   slugs: string[]
@@ -40,11 +41,8 @@ export default function ResourcePageV2({
   const router = useRouter()
   const { xs } = Grid.useBreakpoint()
   const { user } = useContext(UserContext)
+  const [sidebarVisible, setSidebarVisible] = useState(false)
 
-  /**
-   * Temporary fix, after figuring out why cookies are not being sent in /api,
-   * remove the following useEffect, and get enrolled status directly from /api
-   **/
   const [enrolled, setEnrolled] = useState(false)
   useEffect(() => {
     if (resource.id) {
@@ -61,10 +59,6 @@ export default function ResourcePageV2({
     }
   }, [resource.id])
 
-  /**
-   * Temporary fix, after figuring out why cookies are not being sent in /api,
-   * remove the following useEffect, and get completedSectionIds directly from /api
-   **/
   const [completedSectionIds, setCompletedSectionIds] = useState([] as string[])
   useEffect(() => {
     if (enrolled && resource.id) {
@@ -80,16 +74,9 @@ export default function ResourcePageV2({
     }
   }, [enrolled, resource.id])
 
-  // const enrolled: boolean = data.enrolled
-  // const completedCurrentSection: boolean = data.completedCurrentSection
-  /**
-   * Temporary fix, after figuring out why cookies are not being sent in /api,
-   * remove the following useEffect, and get completedCurrentSection directly from /api
-   **/
   const completedCurrentSection = completedSectionIds.includes(
     currentSection.id
   )
-  // const completedSectionIds = data.completedSectionIds
 
   const goToPreviousSection = async () => {
     await router.push(
@@ -104,43 +91,37 @@ export default function ResourcePageV2({
   }
 
   const startLearning = async () => {
-    console.log({ resource })
-    if (resource?.id) {
-      console.log('here')
-      NProgress.start()
-      const result = await startProgress({
-        resourceId: resource.id,
-      })
-      console.log({ result })
-      console.log(`${router.asPath}${result.resource.firstPageSlugsPath}`)
-      if (resource.verified) {
-        await router.push(
-          `/learn/${resource.slug}${result.resource.firstPageSlugsPath}`
-        )
-      } else {
-        console.log({
-          path: `/${resource.user.username}/learn/${resource.slug}${result.resource.firstPageSlugsPath}`,
-        })
-        await router.push(
-          `/${resource.user.username}/learn/${resource.slug}${result.resource.firstPageSlugsPath}`
-        )
-      }
-      NProgress.done()
-    }
+    NProgress.start()
+    const result = await startProgress({
+      resourceId: resource.id,
+    })
+    await router.push(
+      `/learn/${resource.slug}${result.resource.firstPageSlugsPath}`
+    )
+    NProgress.done()
   }
+
+  const [, ...sectionIdsPath] = currentSection.pathWithSectionIds.split('/')
 
   return (
     <>
       <Row>
         <Col {...SIDEBAR_COL_LAYOUT}>
-          <SidebarV2
-            sectionsMap={sectionsMap}
-            currentSections={currentSections}
-            resourceSlug={resource.slug}
-            slugs={slugs}
-            defaultSelectedKeys={[currentSection.id as string]}
-            completedSectionIds={completedSectionIds}
+          <MenuOutlined
+            style={{ fontSize: 'x-large' }}
+            onClick={() => setSidebarVisible(!sidebarVisible)}
           />
+          {(sidebarVisible || !xs) && (
+            <SidebarV2
+              sectionsMap={sectionsMap}
+              currentSections={currentSections}
+              resourceSlug={resource.slug}
+              slugs={slugs}
+              defaultSelectedKeys={[currentSection.id as string]}
+              completedSectionIds={completedSectionIds}
+              sectionIdsPath={sectionIdsPath}
+            />
+          )}
         </Col>
 
         <Col className={`${xs ? '' : 'px-5'}`} {...CONTENT_COL_LAYOUT}>

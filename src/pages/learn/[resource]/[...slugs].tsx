@@ -3,7 +3,7 @@ import React from 'react'
 import useSWR from 'swr'
 import { Skeleton } from 'antd'
 
-import ResourcePageV2 from '../../../components/v2/ResourcePageV2'
+import ResourcePageV2 from '../../../components/learn/v2/ResourcePageV2'
 import { SEO } from '../../../components/SEO'
 import { fetcher } from '../../../utils/fetcher'
 import InternalServerError from '../../../components/result/InternalServerError'
@@ -21,8 +21,8 @@ export default function ViewResourcePageV2() {
 
   const resource = data.resource
   const currentSection = data.currentSection
-  const sections = data.sections
   const sectionsMap = data.sectionsMap
+  const siblingSections = data.siblingSections
 
   return (
     <>
@@ -34,7 +34,7 @@ export default function ViewResourcePageV2() {
       <ResourcePageV2
         slugs={slugs}
         currentSection={currentSection}
-        currentSections={sections}
+        currentSections={siblingSections}
         resource={resource}
         sectionsMap={sectionsMap}
       />
